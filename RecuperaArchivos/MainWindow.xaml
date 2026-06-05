@@ -1,0 +1,164 @@
+<Window x:Class="RecuperaArchivos.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RecuperaArchivos" 
+        Height="700" 
+        Width="1000"
+        Background="#F5F5F5"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2196F3" Padding="20">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="RecuperaArchivos" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Herramienta gratuita de recuperación de archivos" FontSize="12" Foreground="#E3F2FD" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar - Controles -->
+            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                <TextBlock Text="Opciones de Escaneo" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                <!-- Selección de Unidad -->
+                <TextBlock Text="Seleccionar Unidad:" Margin="0,0,0,5"/>
+                <ComboBox x:Name="DriveComboBox" Height="35" Margin="0,0,0,15" Padding="10" SelectionChanged="DriveComboBox_SelectionChanged"/>
+
+                <!-- Info de Unidad -->
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15" Background="#FAFAFA">
+                    <TextBlock x:Name="DriveInfoText" TextWrapping="Wrap" FontSize="11" Foreground="#666"/>
+                </Border>
+
+                <!-- Filtros -->
+                <TextBlock Text="Filtros" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <TextBlock Text="Tipo de Archivo:" Margin="0,0,0,5"/>
+                <ComboBox x:Name="FileTypeComboBox" Height="30" Margin="0,0,0,10">
+                    <ComboBoxItem>Todos</ComboBoxItem>
+                    <ComboBoxItem>.jpg</ComboBoxItem>
+                    <ComboBoxItem>.png</ComboBoxItem>
+                    <ComboBoxItem>.pdf</ComboBoxItem>
+                    <ComboBoxItem>.docx</ComboBoxItem>
+                    <ComboBoxItem>.xlsx</ComboBoxItem>
+                    <ComboBoxItem>.mp4</ComboBoxItem>
+                </ComboBox>
+
+                <!-- Tamaño Mínimo -->
+                <TextBlock Text="Tamaño Mínimo (MB):" Margin="0,0,0,5"/>
+                <TextBox x:Name="MinSizeTextBox" Height="30" Margin="0,0,0,10" Padding="8" Text="0"/>
+
+                <!-- Tamaño Máximo -->
+                <TextBlock Text="Tamaño Máximo (MB):" Margin="0,0,0,5"/>
+                <TextBox x:Name="MaxSizeTextBox" Height="30" Margin="0,0,0,15" Padding="8" Text="1000"/>
+
+                <!-- Botones de Acción -->
+                <Button x:Name="ScanButton" 
+                        Content="🔍 Iniciar Escaneo" 
+                        Height="40" 
+                        Background="#4CAF50" 
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Margin="0,0,0,10"
+                        Click="ScanButton_Click"/>
+
+                <Button x:Name="RecoverButton" 
+                        Content="💾 Recuperar Seleccionados" 
+                        Height="40" 
+                        Background="#FF9800" 
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Margin="0,0,0,10"
+                        Click="RecoverButton_Click"
+                        IsEnabled="False"/>
+
+                <Button x:Name="CancelButton" 
+                        Content="⊗ Cancelar" 
+                        Height="40" 
+                        Background="#F44336" 
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Click="CancelButton_Click"
+                        IsEnabled="False"/>
+
+                <!-- Estadísticas -->
+                <TextBlock Text="Estadísticas" FontSize="14" FontWeight="Bold" Margin="0,20,0,10"/>
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Background="#FAFAFA">
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,5">
+                            <Run Text="Archivos encontrados: "/>
+                            <Run x:Name="FilesFoundText" Text="0" FontWeight="Bold" Foreground="#2196F3"/>
+                        </TextBlock>
+                        <TextBlock Margin="0,0,0,5">
+                            <Run Text="Seleccionados: "/>
+                            <Run x:Name="FilesSelectedText" Text="0" FontWeight="Bold" Foreground="#2196F3"/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Tamaño total: "/>
+                            <Run x:Name="TotalSizeText" Text="0 MB" FontWeight="Bold" Foreground="#2196F3"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Main Area - Lista de Archivos -->
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Archivos Encontrados" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <!-- Barra de Progreso -->
+                <ProgressBar x:Name="ScanProgressBar" Height="20" Margin="0,0,0,10" Visibility="Collapsed"/>
+                <TextBlock x:Name="ProgressText" Margin="0,0,0,10" Visibility="Collapsed" Foreground="#666"/>
+
+                <!-- DataGrid -->
+                <DataGrid x:Name="FilesDataGrid" 
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Background="White"
+                          SelectionChanged="FilesDataGrid_SelectionChanged"
+                          AlternatingRowBackground="#F9F9F9">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Header="Seleccionar" Binding="{Binding IsSelected}" Width="80"/>
+                        <DataGridTextColumn Header="Nombre" Binding="{Binding FileName}" Width="250"/>
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding FileType}" Width="80"/>
+                        <DataGridTextColumn Header="Tamaño" Binding="{Binding FileSizeFormatted}" Width="100"/>
+                        <DataGridTextColumn Header="Modificado" Binding="{Binding ModifiedDateFormatted}" Width="150"/>
+                        <DataGridTextColumn Header="Ruta" Binding="{Binding FilePath}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#F0F0F0" BorderBrush="#CCCCCC" BorderThickness="0,1,0,0" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock x:Name="StatusText" Text="Listo" Foreground="#666" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="v1.0.0" Foreground="#999" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="© 2026 RecuperaArchivos" Foreground="#999" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
